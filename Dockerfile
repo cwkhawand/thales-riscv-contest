@@ -132,6 +132,6 @@ RUN useradd -u $UID -m -g user -G plugdev user \
 
 USER user
 
-
-
-
+# Add some aliases
+RUN echo 'alias launch_openocd="cd /workdir/app; openocd -f openocd_digilent_hs2.cfg &"' >> ~/.bashrc
+RUN echo 'launch_gdb() { cd /workdir/app; riscv-none-elf-gdb ${1}.riscv; }' >> ~/.bashrc

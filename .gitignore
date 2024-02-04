@@ -25,6 +25,14 @@ build/
 *.o
 uart
 work-ver/*
+**/corev_apu/fpga/**/*.xpr
+**/corev_apu/fpga/**/*.xci
+**/corev_apu/fpga/**/*.wpc
+**/corev_apu/fpga/**/*.wdf
+**/corev_apu/fpga/**/*.xml
+**/corev_apu/fpga/**/*.lpr
+**/corev_apu/fpga/**/*.rpt
+**/corev_apu/fpga/cva6_fpga.runs/*
 corev_apu/fpga/work-fpga
 corev_apu/fpga/reports/
 corev_apu/fpga/scripts/add_sources.tcl
@@ -47,3 +55,10 @@ Bender.lock
 /tools/
 /util/gcc-toolchain-builder/src/
 /util/gcc-toolchain-builder/build/
+sw/app/*.a
+sw/app/*.bin
+sw/app/*.coe
+sw/app/*.D
+sw/app/*.hex
+sw/app/*.mem
+sw/app/*.riscv
