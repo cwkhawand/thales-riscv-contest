@@ -9,6 +9,18 @@
 #include "fc1.h"
 #include "fc2.h"
 
+/* Multiply and add custom instruction
+ * This custom instruction takes 4 one-byte inputs stored in R1, and 4 one-byte weights stored in R2,
+ * does the multiplications of input[i]*weight[i] in parallel, and then adds the result of the multiplications into Rd
+      0x60    R2    R1     0x0    Rd     0x33
+    +-------+-----+-----+-------+----+---------+
+    | func7 | rs2 | rs1 | func3 | rd | opcode6 |
+    +-------+-----+-----+-------+----+---------+
+    31      25    20    15      12   7        0
+*/
+#ifndef MAD(Rd, R1, R2)
+#define MAD(Rd, R1, R2) asm volatile(".insn r 0x33, 0x0, 0x00, %0, %1, %2\n":"=r"(Rd):"r"(R1),"r"(R2):);
+#endif;
 
 static DATA_T mem[MEMORY_SIZE];
 
@@ -33,7 +45,16 @@ static void macsOnRange(const UDATA_T* __restrict inputs,
                         SUM_T* __restrict weightedSum,
                         int nb_iterations)
 {
-    for (int iter = 0; iter < nb_iterations; ++iter) {
+    int32_t* inputs32 = inputs;
+    int32_t* weights32 = weights;
+    int32_t weightedSumRes = 0;
+    int nb_iter = nb_iterations/4;
+    for (int iter = 0; iter < nb_iter; ++iter) {
+        MAD(weightedSumRes, inputs32[iter], weights32[iter]);
+        *weightedSum += weightedSumRes;
+    }
+
+    for (int iter = nb_iter*4; iter < nb_iterations; ++iter) {
         *weightedSum += inputs[iter] * weights[iter];
     }
 }

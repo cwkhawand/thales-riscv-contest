@@ -10,7 +10,7 @@
 module instr_decoder
   import cvxif_pkg::*;
 #(
-    parameter int                                 NbInstr             = 1,
+    parameter int                                 NbInstr             = 3,
     parameter cvxif_instr_pkg::copro_issue_resp_t CoproInstr[NbInstr] = {0}
 ) (
     input  logic          clk_i,

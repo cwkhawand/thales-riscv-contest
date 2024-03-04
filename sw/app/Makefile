@@ -65,7 +65,7 @@ RISCV_GCC ?= $(RISCV_PREFIX)gcc
 RISCV_OBJCOPY ?= $(RISCV_PREFIX)objcopy
 RISCV_AR ?= $(RISCV_PREFIX)ar
 RISCV_OBJDUMP ?= $(RISCV_PREFIX)objdump
-
+RISCV_DEBUG ?= -g
 
 SRC_BSP_C=$(wildcard $(bsp_dir)/hal/*.c) $(wildcard $(bsp_dir)/drivers/uart/*.c) 
 SRC_BSP_S=$(wildcard $(bsp_dir)/hal/*.S)
@@ -114,12 +114,12 @@ $(1): $(1).mem $(1).bin
 $(1): $(1).coe $(1).mem
 $(1).riscv: libcva6.a $$($(1)_OBJ_FILES)
 	# LINKING
-	$$(RISCV_GCC) $$(RISCV_CFLAGS) -o $$@ $$^ $$(RISCV_LDFLAGS)
+	$$(RISCV_GCC) $$(RISCV_CFLAGS) $(RISCV_DEBUG) -o $$@ $$^ $$(RISCV_LDFLAGS)
 endef
 
 $(foreach bmark,$(bmarks),$(eval $(call generate_rules,$(bmark))))
 
-%.D: %.riscv 
+%.D: %.riscv
 	$(RISCV_OBJDUMP) -D $< > $@
 
 %.hex: %.riscv
@@ -132,10 +132,10 @@ libcva6.a: $(OBJ_BSP)
 	$(RISCV_AR) rcs libcva6.a $(OBJ_BSP)
 
 %.o: %.c
-	$(RISCV_GCC) $(INCS) -o $@ -c $< $(RISCV_CFLAGS)
+	$(RISCV_GCC) $(INCS) $(RISCV_DEBUG) -o $@ -c $< $(RISCV_CFLAGS)
 
 %.o: %.S
-	$(RISCV_GCC) -o $@ -c $< $(CFLAGS)
+	$(RISCV_GCC) $(RISCV_DEBUG) -o $@ -c $< $(CFLAGS)
 
 %.mem: %.bin
 	$(utils_dir)/bin2mem.py $(src_dir)/$<

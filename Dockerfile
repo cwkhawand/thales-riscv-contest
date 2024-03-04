@@ -106,7 +106,6 @@ ENV PATH="$PATH:/util/riscv-openocd/build/bin"
 # Install rule for udev to access HS2 cable
 RUN echo "ATTRS{idVendor}==\"0403\", ATTRS{idProduct}==\"6014\", MODE=\"660\", GROUP=\"plugdev\", TAG+=\"uaccess\"" > /etc/udev/rules.d/60-openocd.rules
 
-
 # install RISCV toolchain
 RUN export RISCV=riscv_toolchain && \
     cd gcc-toolchain-builder && \
@@ -114,6 +113,7 @@ RUN export RISCV=riscv_toolchain && \
     bash ./get-toolchain.sh && \
     bash ./build-toolchain.sh $RISCV
 
+RUN apt-get --no-install-recommends -y install nano
 
 ENV PATH="$PATH:/util/gcc-toolchain-builder/riscv_toolchain/bin"
 
@@ -134,4 +134,4 @@ USER user
 
 # Add some aliases
 RUN echo 'alias launch_openocd="cd /workdir/app; openocd -f openocd_digilent_hs2.cfg &"' >> ~/.bashrc
-RUN echo 'launch_gdb() { cd /workdir/app; riscv-none-elf-gdb ${1}.riscv; }' >> ~/.bashrc
+RUN echo 'launch_gdb() { cd /workdir/app; riscv-none-elf-gdb ${1}; }' >> ~/.bashrc

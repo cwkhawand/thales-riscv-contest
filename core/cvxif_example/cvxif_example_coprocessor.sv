@@ -127,24 +127,15 @@ module cvxif_example_coprocessor
       .pop_i     (instr_pop)
   );
 
-  logic [3:0] c;
-  counter #(
-      .WIDTH(4)
-  ) counter_i (
-      .clk_i     (clk_i),
-      .rst_ni    (rst_ni),
-      .clear_i   (~x_commit_i.x_commit_kill && x_commit_valid_i),
-      .en_i      (1'b1),
-      .load_i    (),
-      .down_i    (),
-      .d_i       (),
-      .q_o       (c),
-      .overflow_o()
-  );
+  logic is_mad_instruction;
+  logic is_mad_done;
+  logic[31:0] mad_result;
 
   always_comb begin
-    x_result_o.data    = req_o.req.rs[0] + req_o.req.rs[1] + (X_NUM_RS == 3 ? req_o.req.rs[2] : 0);
-    x_result_valid_o   = (c == x_result_o.data[3:0]) && ~fifo_empty ? 1 : 0;
+    is_mad_instruction = ((cvxif_instr_pkg::CoproInstr[2].mask & req_o.req.instr) == cvxif_instr_pkg::CoproInstr[2].instr);
+
+    x_result_o.data    = mad_result;
+    x_result_valid_o   = is_mad_done && ~fifo_empty ? 1 : 0;
     x_result_o.id      = req_o.req.id;
     x_result_o.rd      = req_o.req.instr[11:7];
     x_result_o.we      = req_o.resp.writeback & x_result_valid_o;
@@ -152,4 +143,13 @@ module cvxif_example_coprocessor
     x_result_o.exccode = 0;
   end
 
+  mad #() mad_i (
+    .clk_i(clk_i),
+    .rst_ni(rst_ni),
+    .input_valid(is_mad_instruction),
+    .operand_a(req_o.req.rs[0]),
+    .operand_b(req_o.req.rs[1]),
+    .result_valid(is_mad_done),
+    .result(mad_result)
+  );
 endmodule

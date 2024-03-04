@@ -62,3 +62,4 @@ sw/app/*.D
 sw/app/*.hex
 sw/app/*.mem
 sw/app/*.riscv
+report.txt
