@@ -12,15 +12,15 @@
 /* Multiply and add custom instruction
  * This custom instruction takes 4 one-byte inputs stored in R1, and 4 one-byte weights stored in R2,
  * does the multiplications of input[i]*weight[i] in parallel, and then adds the result of the multiplications into Rd
-      0x60    R2    R1     0x0    Rd     0x33
+      0x03    R2    R1     0x0    Rd     0x33
     +-------+-----+-----+-------+----+---------+
     | func7 | rs2 | rs1 | func3 | rd | opcode6 |
     +-------+-----+-----+-------+----+---------+
     31      25    20    15      12   7        0
 */
-#ifndef MAD(Rd, R1, R2)
-#define MAD(Rd, R1, R2) asm volatile(".insn r 0x33, 0x0, 0x00, %0, %1, %2\n":"=r"(Rd):"r"(R1),"r"(R2):);
-#endif;
+#ifndef MADUS
+#define MADUS(Rd, R1, R2) asm volatile(".insn r 0x33, 0x0, 0x03, %0, %1, %2\n.insn r 0x33, 0x0, 0x03, %0, %1, %2\n":"=r"(Rd):"r"(R1),"r"(R2):); 
+#endif
 
 static DATA_T mem[MEMORY_SIZE];
 
@@ -45,12 +45,23 @@ static void macsOnRange(const UDATA_T* __restrict inputs,
                         SUM_T* __restrict weightedSum,
                         int nb_iterations)
 {
-    int32_t* inputs32 = inputs;
-    int32_t* weights32 = weights;
+    uint32_t* inputs32 = (uint32_t*)inputs;
+    int32_t* weights32 = (int32_t*)weights;
     int32_t weightedSumRes = 0;
-    int nb_iter = nb_iterations/4;
+
+    int nb_iter = ((uintptr_t)inputs%4 == 0 && (uintptr_t)weights%4 == 0) ? nb_iterations/4 : 0;
+    
     for (int iter = 0; iter < nb_iter; ++iter) {
-        MAD(weightedSumRes, inputs32[iter], weights32[iter]);
+        MADUS(weightedSumRes, inputs32[iter], weights32[iter]);
+        /*int intSum = inputs[iter*4]*weights[iter*4] + inputs[iter*4 + 1]*weights[iter*4 + 1] + inputs[iter*4 + 2]*weights[iter*4 + 2] + inputs[iter*4 + 3]*weights[iter*4 + 3];
+        if (intSum != weightedSumRes) {
+            printf("------------------Got %d instead of %d\n", weightedSumRes, intSum);
+        } else {
+            printf("++++++++++++++++++++OK++++++++++++++++++++\n");
+        }
+        printf("Inputs: %d %d %d %d, Weights: %d %d %d %d\n", inputs[iter*4], inputs[iter*4 + 1], inputs[iter*4 + 2], inputs[iter*4 + 3], weights[iter*4], weights[iter*4 + 1], weights[iter*4 + 2], weights[iter*4 + 3]);
+        printf("Inputs32: 0x%08X, Weights32: 0x%08X\n", inputs32[iter], weights32[iter]);
+        printf("@%lx/%lx | @%lx/%lx\n", inputs, inputs32, weights, weights32);*/
         *weightedSum += weightedSumRes;
     }
 
