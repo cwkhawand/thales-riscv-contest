@@ -44,12 +44,7 @@ int processInput(        UDATA_T* inputBuffer,
 
 
 int main(int argc, char* argv[]) {
-    int inputs = 0x00000303;
-    int weights = 0x0000002;
-    int res = 0;
-    printf("Executing MAD instruction\n");
-    asm volatile(".insn r 0x33, 0x0, 0x03, %0, %1, %2\n":"=r"(res):"r"(inputs),"r"(weights):);
-    printf("Result: %d\n", res);
+
     // const N2D2::Network network{};
     size_t instret, cycles;
 

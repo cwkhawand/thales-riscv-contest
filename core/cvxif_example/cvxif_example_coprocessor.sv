@@ -95,7 +95,7 @@ module cvxif_example_coprocessor
 
   assign instr_push = x_issue_resp_o.accept ? 1 : 0;
   assign instr_pop = (x_commit_i.x_commit_kill && x_commit_valid_i) || x_result_valid_o;
-  assign x_issue_ready_q = ~fifo_full; // if something is in the fifo, the instruction is being processed
+  assign x_issue_ready_q = fifo_empty; // if something is in the fifo, the instruction is being processed
                                        // so we can't receive anything else
   assign req_i.req = x_issue_req_i;
   assign req_i.resp = x_issue_resp_o;
@@ -111,7 +111,7 @@ module cvxif_example_coprocessor
   fifo_v3 #(
       .FALL_THROUGH(1),         //data_o ready and pop in the same cycle
       .DATA_WIDTH  (64),
-      .DEPTH       (8),
+      .DEPTH       (1),
       .dtype       (x_issue_t)
   ) fifo_commit_i (
       .clk_i     (clk_i),
@@ -132,7 +132,7 @@ module cvxif_example_coprocessor
   logic[31:0] mad_result;
 
   always_comb begin
-    is_mad_instruction = ((cvxif_instr_pkg::CoproInstr[2].mask & req_o.req.instr) == cvxif_instr_pkg::CoproInstr[2].instr);
+    is_mad_instruction = ~fifo_empty & ((cvxif_instr_pkg::CoproInstr[2].mask & req_o.req.instr) == cvxif_instr_pkg::CoproInstr[2].instr);
 
     x_result_o.data    = mad_result;
     x_result_valid_o   = is_mad_done && ~fifo_empty ? 1 : 0;

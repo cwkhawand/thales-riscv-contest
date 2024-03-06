@@ -12,6 +12,7 @@ module mad
 );
 
 logic result_valid_i;
+logic result_valid_o;
 integer result1;
 integer result2;
 integer result3;
@@ -26,6 +27,8 @@ reg [7 : 0] bus_b_31_24;
 reg [7 : 0] bus_b_23_16;
 reg [7 : 0] bus_b_15_8;
 reg [7 : 0] bus_b_7_0;
+
+assign result_valid = result_valid_o;
 
 assign result1 = $signed(
     {bus_a_7_0[7] & 1'b0, bus_a_7_0}
@@ -82,12 +85,12 @@ end
 always_ff @(posedge clk_i or negedge rst_ni) begin
     if (~rst_ni) begin
         result     <='0;
-        result_valid <='0;
+        result_valid_o <='0;
     end else begin
         // Output Register
         result <= result1 + result2 + result3 + result4;
 
-        result_valid <= result_valid_i & input_valid;
+        result_valid_o <= result_valid_i & input_valid & ~result_valid_o;
     end
 end
 
