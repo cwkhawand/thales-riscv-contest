@@ -87,7 +87,7 @@ always_ff @(posedge clk_i or negedge rst_ni) begin
         // Output Register
         result <= result1 + result2 + result3 + result4;
 
-        result_valid <= result_valid_i;
+        result_valid <= result_valid_i & input_valid;
     end
 end
 
