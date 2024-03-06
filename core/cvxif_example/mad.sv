@@ -27,10 +27,26 @@ reg [7 : 0] bus_b_23_16;
 reg [7 : 0] bus_b_15_8;
 reg [7 : 0] bus_b_7_0;
 
-assign result1 = bus_a_7_0*bus_b_7_0;
-assign result2 = bus_a_15_8*bus_b_15_8;
-assign result3 = bus_a_23_16*bus_b_23_16;
-assign result4 = bus_a_31_24*bus_b_31_24;
+assign result1 = $signed(
+    {bus_a_7_0[7] & 1'b0, bus_a_7_0}
+) * $signed(
+    {bus_b_7_0[7] & 1'b1, bus_b_7_0}
+);
+assign result2 = $signed(
+    {bus_a_15_8[7] & 1'b0, bus_a_15_8}
+) * $signed(
+    {bus_b_15_8[7] & 1'b1, bus_b_15_8}
+);
+assign result3 = $signed(
+    {bus_a_23_16[7] & 1'b0, bus_a_23_16}
+) * $signed(
+    {bus_b_23_16[7] & 1'b1, bus_b_23_16}
+);
+assign result4 = $signed(
+    {bus_a_31_24[7] & 1'b0, bus_a_31_24}
+) * $signed(
+    {bus_b_31_24[7] & 1'b1, bus_b_31_24}
+);
 
 always @(posedge clk_i or negedge rst_ni) begin
     if (~rst_ni) begin
