@@ -16,7 +16,7 @@ package cvxif_instr_pkg;
   } copro_issue_resp_t;
 
   // 2 Possible RISCV instructions for Coprocessor
-  parameter int unsigned NbInstr = 3;
+  parameter int unsigned NbInstr = 6;
   parameter copro_issue_resp_t CoproInstr[NbInstr] = '{
       '{
           instr: 32'b00000_00_00000_00000_0_00_00000_0101011,  // custom1 opcode
@@ -44,7 +44,43 @@ package cvxif_instr_pkg;
       },
       '{
           instr: 32'b00000_11_00000_00000_0_00_00000_0110011,  // mad opcode
-          mask: 32'b11111_11_00000_00000_0_00_00000_1111111,
+          mask: 32'b11111_11_00000_00000_1_11_00000_1111111,
+          resp : '{
+              accept : 1'b1,
+              writeback : 1'b1,
+              dualwrite : 1'b0,
+              dualread : 1'b0,
+              loadstore : 1'b0,
+              exc : 1'b0
+          }
+      },
+      '{
+          instr: 32'b00000_00_00000_00000_1_00_00000_0100011,  // madsi.v opcode
+          mask: 32'b00000_00_00000_00000_1_11_00000_1111111,
+          resp : '{
+              accept : 1'b1,
+              writeback : 1'b0,
+              dualwrite : 1'b0,
+              dualread : 1'b0,
+              loadstore : 1'b0,
+              exc : 1'b0
+          }
+      },
+      '{
+          instr: 32'b00000_00_00000_00000_1_01_00000_0100011,  // madsw.v opcode
+          mask: 32'b00000_00_00000_00000_1_11_00000_1111111,
+          resp : '{
+              accept : 1'b1,
+              writeback : 1'b0,
+              dualwrite : 1'b0,
+              dualread : 1'b0,
+              loadstore : 1'b0,
+              exc : 1'b0
+          }
+      },
+      '{
+          instr: 32'b00000_11_00000_00000_0_01_00000_0110011,  // made.v opcode
+          mask: 32'b11111_11_00000_00000_1_11_00000_1111111,
           resp : '{
               accept : 1'b1,
               writeback : 1'b1,

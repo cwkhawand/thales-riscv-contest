@@ -9,6 +9,8 @@
 #include "fc1.h"
 #include "fc2.h"
 
+int R0;
+
 /* Multiply and add custom instruction
  * This custom instruction takes 4 one-byte inputs stored in R1, and 4 one-byte weights stored in R2,
  * does the multiplications of input[i]*weight[i] in parallel, and then adds the result of the multiplications into Rd
@@ -20,6 +22,18 @@
 */
 #ifndef MADUS
 #define MADUS(Rd, R1, R2) asm volatile(".insn r 0x33, 0x0, 0x03, %0, %1, %2\n":"=r"(Rd):"r"(R1),"r"(R2):); 
+#endif
+
+#ifndef MADSIV
+#define MADSIV(R1, Imm) asm volatile(".insn s 0x23, 0x4, %1, %2(a0)\n":"=r"(R0):"r"(R1),"i"(Imm):); 
+#endif
+
+#ifndef MADSWV
+#define MADSWV(R1, Imm) asm volatile(".insn s 0x23, 0x5, %1, %2(a0)\n":"=r"(R0):"r"(R1),"i"(Imm):); 
+#endif
+
+#ifndef MADEV
+#define MADEV(Rd) asm volatile(".insn r 0x33, 0x1, 0x03, %0, a0, a0\n":"=r"(Rd):); 
 #endif
 
 static DATA_T mem[MEMORY_SIZE];
@@ -45,26 +59,54 @@ static void macsOnRange(const UDATA_T* __restrict inputs,
                         SUM_T* __restrict weightedSum,
                         int nb_iterations)
 {    
-    int32_t weightedSumRes = 0;
+    if (nb_iterations < 5) {
+        int32_t weightedSumRes = 0;
 
-    int nb_iter4 = ((uintptr_t)inputs%4 == 0 && (uintptr_t)weights%4 == 0) ? nb_iterations/4 : 0;
-    
-    uint32_t* inputs32 = (uint32_t*)inputs;
-    int32_t* weights32 = (int32_t*)weights;
-    for (int iter = 0; iter < nb_iter4; ++iter) {
-        MADUS(weightedSumRes, inputs32[iter], weights32[iter]);
-        *weightedSum += weightedSumRes;
-    }
+        int nb_iter4 = ((uintptr_t)inputs%4 == 0 && (uintptr_t)weights%4 == 0) ? nb_iterations/4 : 0;
+        
+        uint32_t* inputs32 = (uint32_t*)inputs;
+        int32_t* weights32 = (int32_t*)weights;
+        for (int iter = 0; iter < nb_iter4; ++iter) {
+            MADUS(weightedSumRes, inputs32[iter], weights32[iter]);
+            *weightedSum += weightedSumRes;
+        }
 
-    // uint16_t* inputs16 = (uint16_t*)inputs;
-    // int16_t* weights16 = (int16_t*)weights;
-    // for (int iter = nb_iter4*2; iter < nb_iterations/2; ++iter) {
-    //     MADUS(weightedSumRes, inputs16[iter], weights16[iter]);
-    //     *weightedSum += weightedSumRes;
-    // }
+        uint16_t* inputs16 = (uint16_t*)inputs;
+        int16_t* weights16 = (int16_t*)weights;
+        for (int iter = nb_iter4*2; iter < nb_iterations/2; ++iter) {
+            MADUS(weightedSumRes, inputs16[iter], weights16[iter]);
+            *weightedSum += weightedSumRes;
+        }
+    } else if (nb_iterations < 128) {
+        uint16_t* inputs16 = (uint16_t*)inputs;
+        for (int iter = 0; iter < nb_iterations/2; iter++) {
+            MADSIV(inputs16[iter], 2);
+        }
 
-    for (int iter = nb_iter4*4; iter < nb_iterations; ++iter) {
-        *weightedSum += inputs[iter] * weights[iter];
+        int16_t* weights16 = (int16_t*)weights;
+        for (int iter = 0; iter < nb_iterations/2; iter++) {
+            MADSWV(weights16[iter], 2);
+        }
+
+        MADEV(weightedSum);
+    } else {
+        int32_t weightedSumRes = 0;
+
+        int nb_iter4 = ((uintptr_t)inputs%4 == 0 && (uintptr_t)weights%4 == 0) ? nb_iterations/4 : 0;
+        
+        uint32_t* inputs32 = (uint32_t*)inputs;
+        int32_t* weights32 = (int32_t*)weights;
+        for (int iter = 0; iter < nb_iter4; ++iter) {
+            MADUS(weightedSumRes, inputs32[iter], weights32[iter]);
+            *weightedSum += weightedSumRes;
+        }
+
+        uint16_t* inputs16 = (uint16_t*)inputs;
+        int16_t* weights16 = (int16_t*)weights;
+        for (int iter = nb_iter4*2; iter < nb_iterations/2; ++iter) {
+            MADUS(weightedSumRes, inputs16[iter], weights16[iter]);
+            *weightedSum += weightedSumRes;
+        }
     }
 }
 

@@ -127,15 +127,20 @@ module cvxif_example_coprocessor
       .pop_i     (instr_pop)
   );
 
-  logic is_mad_instruction;
-  logic is_mad_done;
-  logic[31:0] mad_result;
+  logic is_mad_instruction, is_madsiv_instruction, is_madswv_instruction, is_madev_instruction;
+  logic is_mad_done, is_madv_done;
+  logic[31:0] mad_result, madv_result;
 
   always_comb begin
     is_mad_instruction = ~fifo_empty & ((cvxif_instr_pkg::CoproInstr[2].mask & req_o.req.instr) == cvxif_instr_pkg::CoproInstr[2].instr);
+    is_madsiv_instruction = ~fifo_empty & ((cvxif_instr_pkg::CoproInstr[3].mask & req_o.req.instr) == cvxif_instr_pkg::CoproInstr[3].instr);
+    is_madswv_instruction = ~fifo_empty & ((cvxif_instr_pkg::CoproInstr[4].mask & req_o.req.instr) == cvxif_instr_pkg::CoproInstr[4].instr);
+    is_madev_instruction = ~fifo_empty & ((cvxif_instr_pkg::CoproInstr[5].mask & req_o.req.instr) == cvxif_instr_pkg::CoproInstr[5].instr);
 
-    x_result_o.data    = mad_result;
-    x_result_valid_o   = is_mad_done && ~fifo_empty ? 1 : 0;
+    x_result_o.data    = (is_mad_instruction) ? mad_result :
+                         (is_madev_instruction) ? madv_result :
+                         8'h00000000;
+    x_result_valid_o   = (is_mad_done | is_madv_done) && ~fifo_empty ? 1 : 0;
     x_result_o.id      = req_o.req.id;
     x_result_o.rd      = req_o.req.instr[11:7];
     x_result_o.we      = req_o.resp.writeback & x_result_valid_o;
@@ -151,5 +156,21 @@ module cvxif_example_coprocessor
     .operand_b(req_o.req.rs[1]),
     .result_valid(is_mad_done),
     .result(mad_result)
+  );
+
+logic[11:0] data_count;
+assign data_count = {req_o.req.instr[31:25], req_o.req.instr[11:7]};
+
+  madv #() madv_i (
+    .clk_i(clk_i),
+    .rst_ni(rst_ni),
+    .data_valid(is_madsiv_instruction | is_madswv_instruction),
+    .data_count(data_count),
+    .data(req_o.req.rs[1]),
+    .is_input(is_madsiv_instruction),
+    .is_weight(is_madswv_instruction),
+    .execute(is_madev_instruction),
+    .result_valid(is_madv_done),
+    .result(madv_result)
   );
 endmodule

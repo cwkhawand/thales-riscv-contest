@@ -74,6 +74,7 @@ ${CVA6_REPO_DIR}/core/include/cvxif_pkg.sv
 ${CVA6_REPO_DIR}/core/cvxif_example/include/cvxif_instr_pkg.sv
 ${CVA6_REPO_DIR}/core/cvxif_fu.sv
 ${CVA6_REPO_DIR}/core/cvxif_example/mad.sv
+${CVA6_REPO_DIR}/core/cvxif_example/madv.sv
 ${CVA6_REPO_DIR}/core/cvxif_example/cvxif_example_coprocessor.sv
 ${CVA6_REPO_DIR}/core/cvxif_example/instr_decoder.sv
 
