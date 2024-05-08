@@ -7,29 +7,6 @@
 #include "Network.h"
 #include "util.h"
 
-int _R0;
-
-/*
-                           0b001         0x33
-    +--------------+-----+-------+----+---------+
-    | simm12[11:0] | rs1 | func3 | rd | opcode6 |
-    +--------------+-----+-------+----+---------+
-    31             20    15      12   7         0
-*/
-#ifndef MADSIV
-#define MADSIV(R1, Imm) asm volatile(".insn s 0x23, 0x4, %1, %2(a0)\n":"=r"(_R0):"r"(R1),"i"(Imm):); 
-#endif
-
-#ifndef MADSWV
-#define MADSWV(R1, Imm) asm volatile(".insn s 0x23, 0x5, %1, %2(a0)\n":"=r"(_R0):"r"(R1),"i"(Imm):); 
-#endif
-
-#ifndef MADEV
-#define MADEV(Rd) asm volatile(".insn r 0x33, 0x1, 0x03, %0, a0, a0\n":"=r"(Rd):); 
-#endif
-
-
-
 void readStimulus(
                   UDATA_T* inputBuffer,
                   Target_T* expectedOutputBuffer)
@@ -67,29 +44,6 @@ int processInput(        UDATA_T* inputBuffer,
 
 
 int main(int argc, char* argv[]) {
-    // printf("i\n");
-    // int input = 0x00000A01;
-    // MADSIV(input, 1);
-    // input = 0x00000004;
-    // MADSIV(input, 1);
-    // printf("w\n");
-    // int weight = 0x00000202;
-    // MADSWV(weight, 1);
-    // weight = 0x00000002;
-    // MADSWV(weight, 1);
-    // printf("r\n");
-    // int result = 0;
-    // MADEV(result);
-    // printf("Result: %d\n", result);
-
-    // input = 0x00000001;
-    // MADSIV(input, 4);
-    // weight = 0x00000002;
-    // MADSWV(weight, 4);
-    // result = 0;
-    // MADEV(result);
-    // printf("Result 2: %d\n", result);
-    // return 1;
     // const N2D2::Network network{};
     size_t instret, cycles;
 

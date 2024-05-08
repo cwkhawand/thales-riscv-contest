@@ -24,8 +24,8 @@ int R0;
 #define MADUS(Rd, R1, R2) asm volatile(".insn r 0x33, 0x0, 0x03, %0, %1, %2\n":"=r"(Rd):"r"(R1),"r"(R2):); 
 #endif
 
-#ifndef MADSIV
-#define MADSIV(R1, Imm) asm volatile(".insn s 0x23, 0x4, %1, %2(a0)\n":"=r"(R0):"r"(R1),"i"(Imm):); 
+#ifndef MADUIV
+#define MADUIV(R1, Imm) asm volatile(".insn s 0x23, 0x4, %1, %2(a0)\n":"=r"(R0):"r"(R1),"i"(Imm):); 
 #endif
 
 #ifndef MADSWV
@@ -59,52 +59,214 @@ static void macsOnRange(const UDATA_T* __restrict inputs,
                         SUM_T* __restrict weightedSum,
                         int nb_iterations)
 {    
-    if (nb_iterations < 5) {
-        int32_t weightedSumRes = 0;
+    int32_t weightedSumRes;
+    if (nb_iterations == 4) {
+        MADUS(weightedSumRes, ((uint16_t*)inputs)[0], ((int16_t*)weights)[0]);
+        *weightedSum += weightedSumRes;
+        MADUS(weightedSumRes, ((uint16_t*)inputs)[1], ((int16_t*)weights)[1]);
+        *weightedSum += weightedSumRes;
+    } else if (nb_iterations == 80) {
+        MADUIV(((uint16_t*)inputs)[0], 2);
+        MADUIV(((uint16_t*)inputs)[1], 2);
+        MADUIV(((uint16_t*)inputs)[2], 2);
+        MADUIV(((uint16_t*)inputs)[3], 2);
+        MADUIV(((uint16_t*)inputs)[4], 2);
+        MADUIV(((uint16_t*)inputs)[5], 2);
+        MADUIV(((uint16_t*)inputs)[6], 2);
+        MADUIV(((uint16_t*)inputs)[7], 2);
+        MADUIV(((uint16_t*)inputs)[8], 2);
+        MADUIV(((uint16_t*)inputs)[9], 2);
+        MADUIV(((uint16_t*)inputs)[10], 2);
+        MADUIV(((uint16_t*)inputs)[11], 2);
+        MADUIV(((uint16_t*)inputs)[12], 2);
+        MADUIV(((uint16_t*)inputs)[13], 2);
+        MADUIV(((uint16_t*)inputs)[14], 2);
+        MADUIV(((uint16_t*)inputs)[15], 2);
+        MADUIV(((uint16_t*)inputs)[16], 2);
+        MADUIV(((uint16_t*)inputs)[17], 2);
+        MADUIV(((uint16_t*)inputs)[18], 2);
+        MADUIV(((uint16_t*)inputs)[19], 2);
+        MADUIV(((uint16_t*)inputs)[20], 2);
+        MADUIV(((uint16_t*)inputs)[21], 2);
+        MADUIV(((uint16_t*)inputs)[22], 2);
+        MADUIV(((uint16_t*)inputs)[23], 2);
+        MADUIV(((uint16_t*)inputs)[24], 2);
+        MADUIV(((uint16_t*)inputs)[25], 2);
+        MADUIV(((uint16_t*)inputs)[26], 2);
+        MADUIV(((uint16_t*)inputs)[27], 2);
+        MADUIV(((uint16_t*)inputs)[28], 2);
+        MADUIV(((uint16_t*)inputs)[29], 2);
+        MADUIV(((uint16_t*)inputs)[30], 2);
+        MADUIV(((uint16_t*)inputs)[31], 2);
+        MADUIV(((uint16_t*)inputs)[32], 2);
+        MADUIV(((uint16_t*)inputs)[33], 2);
+        MADUIV(((uint16_t*)inputs)[34], 2);
+        MADUIV(((uint16_t*)inputs)[35], 2);
+        MADUIV(((uint16_t*)inputs)[36], 2);
+        MADUIV(((uint16_t*)inputs)[37], 2);
+        MADUIV(((uint16_t*)inputs)[38], 2);
+        MADUIV(((uint16_t*)inputs)[39], 2);
 
-        int nb_iter4 = ((uintptr_t)inputs%4 == 0 && (uintptr_t)weights%4 == 0) ? nb_iterations/4 : 0;
-        
-        uint32_t* inputs32 = (uint32_t*)inputs;
-        int32_t* weights32 = (int32_t*)weights;
-        for (int iter = 0; iter < nb_iter4; ++iter) {
-            MADUS(weightedSumRes, inputs32[iter], weights32[iter]);
-            *weightedSum += weightedSumRes;
-        }
+        MADSWV(((uint16_t*)weights)[0], 2);
+        MADSWV(((uint16_t*)weights)[1], 2);
+        MADSWV(((uint16_t*)weights)[2], 2);
+        MADSWV(((uint16_t*)weights)[3], 2);
+        MADSWV(((uint16_t*)weights)[4], 2);
+        MADSWV(((uint16_t*)weights)[5], 2);
+        MADSWV(((uint16_t*)weights)[6], 2);
+        MADSWV(((uint16_t*)weights)[7], 2);
+        MADSWV(((uint16_t*)weights)[8], 2);
+        MADSWV(((uint16_t*)weights)[9], 2);
+        MADSWV(((uint16_t*)weights)[10], 2);
+        MADSWV(((uint16_t*)weights)[11], 2);
+        MADSWV(((uint16_t*)weights)[12], 2);
+        MADSWV(((uint16_t*)weights)[13], 2);
+        MADSWV(((uint16_t*)weights)[14], 2);
+        MADSWV(((uint16_t*)weights)[15], 2);
+        MADSWV(((uint16_t*)weights)[16], 2);
+        MADSWV(((uint16_t*)weights)[17], 2);
+        MADSWV(((uint16_t*)weights)[18], 2);
+        MADSWV(((uint16_t*)weights)[19], 2);
+        MADSWV(((uint16_t*)weights)[20], 2);
+        MADSWV(((uint16_t*)weights)[21], 2);
+        MADSWV(((uint16_t*)weights)[22], 2);
+        MADSWV(((uint16_t*)weights)[23], 2);
+        MADSWV(((uint16_t*)weights)[24], 2);
+        MADSWV(((uint16_t*)weights)[25], 2);
+        MADSWV(((uint16_t*)weights)[26], 2);
+        MADSWV(((uint16_t*)weights)[27], 2);
+        MADSWV(((uint16_t*)weights)[28], 2);
+        MADSWV(((uint16_t*)weights)[29], 2);
+        MADSWV(((uint16_t*)weights)[30], 2);
+        MADSWV(((uint16_t*)weights)[31], 2);
+        MADSWV(((uint16_t*)weights)[32], 2);
+        MADSWV(((uint16_t*)weights)[33], 2);
+        MADSWV(((uint16_t*)weights)[34], 2);
+        MADSWV(((uint16_t*)weights)[35], 2);
+        MADSWV(((uint16_t*)weights)[36], 2);
+        MADSWV(((uint16_t*)weights)[37], 2);
+        MADSWV(((uint16_t*)weights)[38], 2);
+        MADSWV(((uint16_t*)weights)[39], 2);
+        MADEV(weightedSumRes);
+        // int16_t predicted = 0;
+        // for (int iter = 0; iter < nb_iterations; ++iter) {
+        //     predicted += inputs[iter] * weights[iter];
+        // }
+        // if (weightedSumRes != predicted) {
+        //     printf("Conflict: %d instead of %d\n", weightedSumRes, predicted);
+        // }
+        *weightedSum += weightedSumRes;
+    } else if (nb_iterations == 96) {
+        MADUIV(((uint16_t*)inputs)[0], 2);
+        MADUIV(((uint16_t*)inputs)[1], 2);
+        MADUIV(((uint16_t*)inputs)[2], 2);
+        MADUIV(((uint16_t*)inputs)[3], 2);
+        MADUIV(((uint16_t*)inputs)[4], 2);
+        MADUIV(((uint16_t*)inputs)[5], 2);
+        MADUIV(((uint16_t*)inputs)[6], 2);
+        MADUIV(((uint16_t*)inputs)[7], 2);
+        MADUIV(((uint16_t*)inputs)[8], 2);
+        MADUIV(((uint16_t*)inputs)[9], 2);
+        MADUIV(((uint16_t*)inputs)[10], 2);
+        MADUIV(((uint16_t*)inputs)[11], 2);
+        MADUIV(((uint16_t*)inputs)[12], 2);
+        MADUIV(((uint16_t*)inputs)[13], 2);
+        MADUIV(((uint16_t*)inputs)[14], 2);
+        MADUIV(((uint16_t*)inputs)[15], 2);
+        MADUIV(((uint16_t*)inputs)[16], 2);
+        MADUIV(((uint16_t*)inputs)[17], 2);
+        MADUIV(((uint16_t*)inputs)[18], 2);
+        MADUIV(((uint16_t*)inputs)[19], 2);
+        MADUIV(((uint16_t*)inputs)[20], 2);
+        MADUIV(((uint16_t*)inputs)[21], 2);
+        MADUIV(((uint16_t*)inputs)[22], 2);
+        MADUIV(((uint16_t*)inputs)[23], 2);
+        MADUIV(((uint16_t*)inputs)[24], 2);
+        MADUIV(((uint16_t*)inputs)[25], 2);
+        MADUIV(((uint16_t*)inputs)[26], 2);
+        MADUIV(((uint16_t*)inputs)[27], 2);
+        MADUIV(((uint16_t*)inputs)[28], 2);
+        MADUIV(((uint16_t*)inputs)[29], 2);
+        MADUIV(((uint16_t*)inputs)[30], 2);
+        MADUIV(((uint16_t*)inputs)[31], 2);
+        MADUIV(((uint16_t*)inputs)[32], 2);
+        MADUIV(((uint16_t*)inputs)[33], 2);
+        MADUIV(((uint16_t*)inputs)[34], 2);
+        MADUIV(((uint16_t*)inputs)[35], 2);
+        MADUIV(((uint16_t*)inputs)[36], 2);
+        MADUIV(((uint16_t*)inputs)[37], 2);
+        MADUIV(((uint16_t*)inputs)[38], 2);
+        MADUIV(((uint16_t*)inputs)[39], 2);
+        MADUIV(((uint16_t*)inputs)[40], 2);
+        MADUIV(((uint16_t*)inputs)[41], 2);
+        MADUIV(((uint16_t*)inputs)[42], 2);
+        MADUIV(((uint16_t*)inputs)[43], 2);
+        MADUIV(((uint16_t*)inputs)[44], 2);
+        MADUIV(((uint16_t*)inputs)[45], 2);
+        MADUIV(((uint16_t*)inputs)[46], 2);
+        MADUIV(((uint16_t*)inputs)[47], 2);
 
-        uint16_t* inputs16 = (uint16_t*)inputs;
-        int16_t* weights16 = (int16_t*)weights;
-        for (int iter = nb_iter4*2; iter < nb_iterations/2; ++iter) {
-            MADUS(weightedSumRes, inputs16[iter], weights16[iter]);
-            *weightedSum += weightedSumRes;
-        }
-    } else if (nb_iterations < 128) {
-        uint16_t* inputs16 = (uint16_t*)inputs;
-        for (int iter = 0; iter < nb_iterations/2; iter++) {
-            MADSIV(inputs16[iter], 2);
-        }
-
-        int16_t* weights16 = (int16_t*)weights;
-        for (int iter = 0; iter < nb_iterations/2; iter++) {
-            MADSWV(weights16[iter], 2);
-        }
-
-        MADEV(weightedSum);
+        MADSWV(((uint16_t*)weights)[0], 2);
+        MADSWV(((uint16_t*)weights)[1], 2);
+        MADSWV(((uint16_t*)weights)[2], 2);
+        MADSWV(((uint16_t*)weights)[3], 2);
+        MADSWV(((uint16_t*)weights)[4], 2);
+        MADSWV(((uint16_t*)weights)[5], 2);
+        MADSWV(((uint16_t*)weights)[6], 2);
+        MADSWV(((uint16_t*)weights)[7], 2);
+        MADSWV(((uint16_t*)weights)[8], 2);
+        MADSWV(((uint16_t*)weights)[9], 2);
+        MADSWV(((uint16_t*)weights)[10], 2);
+        MADSWV(((uint16_t*)weights)[11], 2);
+        MADSWV(((uint16_t*)weights)[12], 2);
+        MADSWV(((uint16_t*)weights)[13], 2);
+        MADSWV(((uint16_t*)weights)[14], 2);
+        MADSWV(((uint16_t*)weights)[15], 2);
+        MADSWV(((uint16_t*)weights)[16], 2);
+        MADSWV(((uint16_t*)weights)[17], 2);
+        MADSWV(((uint16_t*)weights)[18], 2);
+        MADSWV(((uint16_t*)weights)[19], 2);
+        MADSWV(((uint16_t*)weights)[20], 2);
+        MADSWV(((uint16_t*)weights)[21], 2);
+        MADSWV(((uint16_t*)weights)[22], 2);
+        MADSWV(((uint16_t*)weights)[23], 2);
+        MADSWV(((uint16_t*)weights)[24], 2);
+        MADSWV(((uint16_t*)weights)[25], 2);
+        MADSWV(((uint16_t*)weights)[26], 2);
+        MADSWV(((uint16_t*)weights)[27], 2);
+        MADSWV(((uint16_t*)weights)[28], 2);
+        MADSWV(((uint16_t*)weights)[29], 2);
+        MADSWV(((uint16_t*)weights)[30], 2);
+        MADSWV(((uint16_t*)weights)[31], 2);
+        MADSWV(((uint16_t*)weights)[32], 2);
+        MADSWV(((uint16_t*)weights)[33], 2);
+        MADSWV(((uint16_t*)weights)[34], 2);
+        MADSWV(((uint16_t*)weights)[35], 2);
+        MADSWV(((uint16_t*)weights)[36], 2);
+        MADSWV(((uint16_t*)weights)[37], 2);
+        MADSWV(((uint16_t*)weights)[38], 2);
+        MADSWV(((uint16_t*)weights)[39], 2);
+        MADSWV(((uint16_t*)weights)[40], 2);
+        MADSWV(((uint16_t*)weights)[41], 2);
+        MADSWV(((uint16_t*)weights)[42], 2);
+        MADSWV(((uint16_t*)weights)[43], 2);
+        MADSWV(((uint16_t*)weights)[44], 2);
+        MADSWV(((uint16_t*)weights)[45], 2);
+        MADSWV(((uint16_t*)weights)[46], 2);
+        MADSWV(((uint16_t*)weights)[47], 2);
+        MADEV(weightedSumRes);
+        // int16_t predicted = 0;
+        // for (int iter = 0; iter < nb_iterations; ++iter) {
+        //     predicted += inputs[iter] * weights[iter];
+        // }
+        // if (weightedSumRes != predicted) {
+        //     printf("Conflict: %d instead of %d\n", weightedSumRes, predicted);
+        // }
+        *weightedSum += weightedSumRes;
     } else {
-        int32_t weightedSumRes = 0;
-
-        int nb_iter4 = ((uintptr_t)inputs%4 == 0 && (uintptr_t)weights%4 == 0) ? nb_iterations/4 : 0;
-        
-        uint32_t* inputs32 = (uint32_t*)inputs;
-        int32_t* weights32 = (int32_t*)weights;
-        for (int iter = 0; iter < nb_iter4; ++iter) {
-            MADUS(weightedSumRes, inputs32[iter], weights32[iter]);
-            *weightedSum += weightedSumRes;
-        }
-
-        uint16_t* inputs16 = (uint16_t*)inputs;
-        int16_t* weights16 = (int16_t*)weights;
-        for (int iter = nb_iter4*2; iter < nb_iterations/2; ++iter) {
-            MADUS(weightedSumRes, inputs16[iter], weights16[iter]);
+        int nb_iterations2 = nb_iterations/2;
+        for (int iter = 0; iter < nb_iterations2; ++iter) {
+            MADUS(weightedSumRes, ((uint16_t*)inputs)[iter], ((int16_t*)weights)[iter]);
             *weightedSum += weightedSumRes;
         }
     }
