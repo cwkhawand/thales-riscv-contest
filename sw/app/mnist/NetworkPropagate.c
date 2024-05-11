@@ -45,26 +45,33 @@ static void macsOnRange(const UDATA_T* __restrict inputs,
                         SUM_T* __restrict weightedSum,
                         int nb_iterations)
 {    
-    int32_t weightedSumRes = 0;
+    int32_t weightedSumRes;
+    if (nb_iterations == 4) {
+        if ((uintptr_t)inputs%4 == 0 && (uintptr_t)weights%4 == 0) {
+            MADUS(weightedSumRes, ((uint32_t*)inputs)[0], ((int32_t*)weights)[0]);
+            *weightedSum += weightedSumRes;
+        } else {
+            MADUS(weightedSumRes, ((uint16_t*)inputs)[0], ((int16_t*)weights)[0]);
+            *weightedSum += weightedSumRes;
+            MADUS(weightedSumRes, ((uint16_t*)inputs)[1], ((int16_t*)weights)[1]);
+            *weightedSum += weightedSumRes;
+        }
+    } else {
+        int nb_iter4 = ((uintptr_t)inputs%4 == 0 && (uintptr_t)weights%4 == 0) ? nb_iterations/4 : 0;
+        uint32_t* inputs32 = (uint32_t*)inputs;
+        int32_t* weights32 = (int32_t*)weights;
+        for (int iter = 0; iter < nb_iter4; ++iter) {
+            MADUS(weightedSumRes, inputs32[iter], weights32[iter]);
+            *weightedSum += weightedSumRes;
+        }
 
-    int nb_iter4 = ((uintptr_t)inputs%4 == 0 && (uintptr_t)weights%4 == 0) ? nb_iterations/4 : 0;
-    
-    uint32_t* inputs32 = (uint32_t*)inputs;
-    int32_t* weights32 = (int32_t*)weights;
-    for (int iter = 0; iter < nb_iter4; ++iter) {
-        MADUS(weightedSumRes, inputs32[iter], weights32[iter]);
-        *weightedSum += weightedSumRes;
-    }
-
-    // uint16_t* inputs16 = (uint16_t*)inputs;
-    // int16_t* weights16 = (int16_t*)weights;
-    // for (int iter = nb_iter4*2; iter < nb_iterations/2; ++iter) {
-    //     MADUS(weightedSumRes, inputs16[iter], weights16[iter]);
-    //     *weightedSum += weightedSumRes;
-    // }
-
-    for (int iter = nb_iter4*4; iter < nb_iterations; ++iter) {
-        *weightedSum += inputs[iter] * weights[iter];
+        int nb_iter2 = nb_iterations/2;
+        uint16_t* inputs16 = (uint16_t*)inputs;
+        int16_t* weights16 = (int16_t*)weights;
+        for (int iter = nb_iter4*2; iter < nb_iter2; ++iter) {
+            MADUS(weightedSumRes, inputs16[iter], weights16[iter]);
+            *weightedSum += weightedSumRes;
+        }
     }
 }
 
